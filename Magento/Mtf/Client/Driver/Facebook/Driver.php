@@ -12,6 +12,8 @@ use Magento\Mtf\Client\Locator;
 use Magento\Mtf\Client\DriverInterface;
 use Magento\Mtf\Client\ElementInterface;
 use Magento\Mtf\System\Event\EventManagerInterface;
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriverBy;
 
 /**
  * Class Driver
@@ -87,7 +89,6 @@ final class Driver implements DriverInterface
     {
         $this->driver->get('about:blank');
         $this->driver->manage()->deleteAllCookies();
-        $this->driver->manage()->window()->maximize();
         $this->driver->navigate()->refresh();
     }
 
@@ -95,11 +96,11 @@ final class Driver implements DriverInterface
      * Get native element
      *
      * @param Locator $locator
-     * @param \RemoteWebElement $context
+     * @param RemoteWebElement $context
      * @param bool $wait
-     * @return \RemoteWebElement
+     * @return RemoteWebElement
      */
-    protected function getElement(Locator $locator, \RemoteWebElement $context = null, $wait = true)
+    protected function getElement(Locator $locator, RemoteWebElement $context = null, $wait = true)
     {
         $context = $context === null
             ? $this->driver
@@ -124,7 +125,7 @@ final class Driver implements DriverInterface
     /**
      * @param ElementInterface $element
      * @param bool $wait
-     * @return \RemoteWebElement
+     * @return RemoteWebElement
      * @throws \Exception
      */
     protected function getNativeElement(ElementInterface $element, $wait = true)
@@ -159,27 +160,27 @@ final class Driver implements DriverInterface
      * Get search criteria
      *
      * @param Locator $locator
-     * @return \WebDriverBy
+     * @return WebDriverBy
      */
     public function getSearchCriteria(Locator $locator)
     {
         $value = $locator['value'];
         switch ($locator['using']) {
             case Locator::SELECTOR_XPATH:
-                return \WebDriverBy::xpath($value);
+                return WebDriverBy::xpath($value);
             case Locator::SELECTOR_ID:
-                return \WebDriverBy::id($value);
+                return WebDriverBy::id($value);
             case Locator::SELECTOR_NAME:
-                return \WebDriverBy::name($value);
+                return WebDriverBy::name($value);
             case Locator::SELECTOR_CLASS_NAME:
-                return \WebDriverBy::className($value);
+                return WebDriverBy::className($value);
             case Locator::SELECTOR_TAG_NAME:
-                return \WebDriverBy::tagName($value);
+                return WebDriverBy::tagName($value);
             case Locator::SELECTOR_LINK_TEXT:
-                return \WebDriverBy::linkText($value);
+                return WebDriverBy::linkText($value);
             case Locator::SELECTOR_CSS:
             default:
-                return \WebDriverBy::cssSelector($value);
+                return WebDriverBy::cssSelector($value);
         }
     }
 
@@ -481,15 +482,15 @@ final class Driver implements DriverInterface
     /**
      * Retrieve relative xpath from context to element
      *
-     * @param \RemoteWebElement $element
-     * @param \RemoteWebElement $context
+     * @param RemoteWebElement $element
+     * @param RemoteWebElement $context
      * @param string $path
      * @param bool $includeLastIndex
      * @return null
      */
     protected function getRelativeXpath(
-        \RemoteWebElement $element,
-        \RemoteWebElement $context,
+        RemoteWebElement $element,
+        RemoteWebElement $context,
         $path = '',
         $includeLastIndex = true
     ) {
@@ -508,7 +509,7 @@ final class Driver implements DriverInterface
             return $this->getRelativeXpath($parentElement, $context, '/' . $tag);
         }
         foreach ($parentElement->findElements($this->getSearchCriteria($childrenLocator)) as $child) {
-            /** @var \RemoteWebElement $child */
+            /** @var RemoteWebElement $child */
             if ($child->equals($element)) {
                 return $this->getRelativeXpath($parentElement, $context, '/' . $tag . '[' . $index . ']' . $path);
             }

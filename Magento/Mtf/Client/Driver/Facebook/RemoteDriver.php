@@ -9,11 +9,17 @@ namespace Magento\Mtf\Client\Driver\Facebook;
 use Magento\Mtf\ObjectManager;
 use Magento\Mtf\Config\DataInterface;
 use Magento\Mtf\System\Event\EventManagerInterface;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\HttpCommandExecutor;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\WebDriverException;
+use Facebook\WebDriver\Remote\WebDriverCommand;
+use Facebook\WebDriver\Remote\DriverCommand;
 
 /**
  * Class RemoteDriver
  */
-final class RemoteDriver extends \RemoteWebDriver
+final class RemoteDriver extends RemoteWebDriver
 {
     /**
      * Default connection timeout
@@ -92,9 +98,24 @@ final class RemoteDriver extends \RemoteWebDriver
         $this->desiredCapabilities = $this->getDesiredCapabilities(
             $config->get('server/0/item/selenium/browserName')
         );
-        if ($this->desiredCapabilities instanceof \DesiredCapabilities) {
+        if ($this->desiredCapabilities instanceof DesiredCapabilities) {
             $this->desiredCapabilities = $this->desiredCapabilities->toArray();
         }
+
+        $chromeOptions = [
+            'chromeOptions' => [
+                'args' => [
+                    '--window-size=1280,1024',
+                    '--disable-extensions',
+                    '--enable-automation',
+                    '--disable-gpu',
+                    '--no-sandbox',
+                    '--ignore-ssl-errors'
+                ]
+            ]
+        ];
+
+        $this->desiredCapabilities = array_merge($this->desiredCapabilities, $chromeOptions);
 
         $this->connectionTimeoutInMs = $config->get(
             'server/0/item/selenium/seleniumServerRequestsTimeout',
@@ -110,21 +131,21 @@ final class RemoteDriver extends \RemoteWebDriver
      * Driver init
      *
      * @param null $sessionId
-     * @throws \WebDriverException
+     * @throws WebDriverException
      * @return void
      */
     protected function init($sessionId = null)
     {
-        /** @var \HttpCommandExecutor $executor */
+        /** @var HttpCommandExecutor $executor */
         $executor = $this->objectManager->create('HttpCommandExecutor', ['url' => $this->url]);
         $executor->setConnectionTimeout($this->connectionTimeoutInMs);
 
-        /** @var \WebDriverCommand $command */
+        /** @var WebDriverCommand $command */
         $command = $this->objectManager->create(
             'WebDriverCommand',
             [
                 'session_id' => $sessionId,
-                'name' => \DriverCommand::NEW_SESSION,
+                'name' => DriverCommand::NEW_SESSION,
                 'parameters' => ['desiredCapabilities' => $this->desiredCapabilities]
             ]
         );
@@ -146,16 +167,16 @@ final class RemoteDriver extends \RemoteWebDriver
      * Get desired capabilities browser
      *
      * @param string $browserName
-     * @return \DesiredCapabilities
+     * @return DesiredCapabilities
      */
     protected function getDesiredCapabilities($browserName)
     {
         switch ($browserName) {
             case 'chrome':
-                return \DesiredCapabilities::chrome();
+                return DesiredCapabilities::chrome();
             case 'firefox':
             default:
-                return \DesiredCapabilities::firefox();
+                return DesiredCapabilities::firefox();
         }
     }
 }
