@@ -125,6 +125,7 @@ class CurlTransport implements CurlInterface
             CURLOPT_COOKIEFILE => '',
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_VERBOSE => true,
         ];
         switch ($method) {
             case CurlInterface::POST:
@@ -157,9 +158,14 @@ class CurlTransport implements CurlInterface
     public function read()
     {
         $response = curl_exec($this->getResource());
+        print_r("curl info: \n");
+        var_dump(curl_getinfo($this->getResource()));
         if ($response === false) {
+            print_r("curl error: \n");
+            var_dump(curl_error($this->getResource()));
             throw new \Exception(curl_error($this->getResource()));
         }
+
         return $response;
     }
 
