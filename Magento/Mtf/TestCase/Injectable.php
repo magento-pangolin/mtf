@@ -164,12 +164,8 @@ abstract class Injectable extends Functional
                     $this->localArguments
                 );
                 $this->executeTestVariation($result, $variation);
-                if ($this->rerunCount > 0 && $this->getStatus() != \PHPUnit_Runner_BaseTestRunner::STATUS_PASSED) {
-                    $this->rerunCount -= 1;
-                } else {
-                    $this->rerunCount = empty($_ENV['rerun_count']) ? 0 : $_ENV['rerun_count'];
-                    $testVariationIterator->next();
-                }
+                $testVariationIterator->next();
+
                 $this->localArguments = [];
             }
         } catch (\PHPUnit_Framework_IncompleteTestError $phpUnitException) {
